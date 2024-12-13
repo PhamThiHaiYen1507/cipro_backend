@@ -103,7 +103,7 @@ export async function authenticateUserGithub(
   // User is already login with local instance. Link the Github account to the local account
   if (req.user) {
     await Promise.all([
-      AccountModel.findByIdAndUpdate(req.user._id, {
+      AccountModel.findOneAndUpdate({ email: req.user.email }, {
         $push: {
           thirdParty: {
             name: "Github",
@@ -132,8 +132,17 @@ export async function authenticateUserGithub(
         console.log('user linked');
         return done(null, linkedAccount);
       }
-      const account = await AccountModel.findOne({
-        username: `Github_${profile.username}`,
+      const account = await AccountModel.findOneAndUpdate({
+        email: (profile.emails?.length ?? 0) > 0 ? profile.emails![0].value : "",
+      }, {
+        $push: {
+          thirdParty: {
+            name: "Github",
+            username: profile.username,
+            accessToken,
+            refreshToken,
+          },
+        },
       });
       // First time login
       if (!account) {
@@ -146,6 +155,8 @@ export async function authenticateUserGithub(
         console.log('user not exists');
         return done(null, newAccount);
       }
+
+      AccountModel.findOneAndDelete({ username: `Github_${profile.username}` });
 
       console.log('user exists');
       return done(null, account);

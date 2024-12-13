@@ -11,7 +11,7 @@ class AccountScanner {
   @prop({ type: () => Scanner, required: true })
   public details!: Scanner;
 }
-export interface Account extends Base {}
+export interface Account extends Base { }
 @post<Account>("save", async function () {
   const account = await AccountModel.findOne({ username: this.username });
   // Set permission based on role
@@ -87,4 +87,7 @@ export class Account {
 
   @prop({ required: true, type: () => [String], default: [] })
   public permission!: string[];
+
+  @prop({ type: String })
+  public fcmToken?: string;
 }

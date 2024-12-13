@@ -1,7 +1,7 @@
 import { Ref, prop } from "@typegoose/typegoose";
 import { Base, TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
 import { Phase } from "./phase";
-export interface Project extends Base {}
+export interface Project extends Base { }
 export class Project extends TimeStamps {
   @prop({ required: true, type: String })
   public name!: string;
@@ -34,4 +34,7 @@ export class Project extends TimeStamps {
 
   @prop({ ref: "Phase", default: [], required: true })
   public phaseList!: Ref<Phase>[];
+
+  @prop({ type: String })
+  public sonarProjectKey?: string;
 }

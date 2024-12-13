@@ -1,0 +1,13 @@
+export const firebaseService = {
+    "type": "service_account",
+    "project_id": "cipro-c8f5d",
+    "private_key_id": "b45be858e1bf6abfc0238b506724ec8a0ef578a0",
+    "private_key": process.env.FIREBASE_NOTIFICATION_PRIVATE_KEY,
+    "client_email": "firebase-adminsdk-3qafa@cipro-c8f5d.iam.gserviceaccount.com",
+    "client_id": "115423033952725742837",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-3qafa%40cipro-c8f5d.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+}

@@ -1,9 +1,9 @@
 import { ArraySubDocumentType, post, prop, Ref } from "@typegoose/typegoose";
 import { Base, TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
+import { ChangeHistoryModel, UserModel } from "./models";
 import { User } from "./user";
 import { Vulnerability } from "./vulnerability";
-import { ChangeHistoryModel, UserModel } from "./models";
-export interface Ticket extends Base {}
+export interface Ticket extends Base { }
 @post<Ticket>("deleteMany", async function (res, next) {
   // Remove tickets from UserModel's ticketAssigned field
   await UserModel.updateMany({
@@ -19,11 +19,11 @@ export class Ticket extends TimeStamps {
   @prop({ required: true, type: String })
   public title!: string;
 
-  @prop({ required: true, ref: () => User })
-  public assignee!: Ref<User>;
+  @prop({ ref: () => User })
+  public assignee?: Ref<User>;
 
-  @prop({ required: true, ref: () => User })
-  public assigner!: Ref<User>;
+  @prop({ ref: () => User })
+  public assigner?: Ref<User>;
 
   @prop({
     required: true,
@@ -49,4 +49,7 @@ export class Ticket extends TimeStamps {
 
   @prop({ required: true, type: String })
   public projectName!: string;
+
+  @prop({ type: String })
+  public sonarIssueKey?: string;
 }
