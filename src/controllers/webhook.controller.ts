@@ -100,7 +100,7 @@ export async function webhookNotification(req: Request, res: Response) {
       })
     }
 
-    if (payload.action == 'queued' && payload.workflow_job.workflow_name == 'SonarCloud') {
+    if (payload.action == 'completed' && payload.workflow_job.workflow_name == 'SonarCloud') {
       getSonarIssues(projectName);
     }
 
