@@ -1,13 +1,13 @@
 import admin from "firebase-admin";
-import fs from "fs";
-import path from "path";
+import { firebaseService } from "./firebase/firebaseService";
 
-const serviceAccountPath = path.resolve(__dirname, './firebase/firebase-service.json');
-
-const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert({
+        projectId: firebaseService.project_id,
+        clientEmail: firebaseService.client_email,
+        privateKey: firebaseService.private_key
+    }),
 });
 
 export default admin;
