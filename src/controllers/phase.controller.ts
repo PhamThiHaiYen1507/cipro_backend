@@ -184,7 +184,7 @@ export async function addArtifactToPhase(req: Request, res: Response) {
         const account = req.user;
         if (account) {
           // Check for scanner preference
-          const someEndpoint = account.scanner.endpoint;
+          const someEndpoint = account.scanner?.endpoint;
           if (someEndpoint) {
             url = `${someEndpoint}/image`;
           }
@@ -212,6 +212,7 @@ export async function addArtifactToPhase(req: Request, res: Response) {
     }
     return res.json(successResponse(null, "Artifact added to phase"));
   } catch (error) {
+    console.error(error);
     return res.json(errorResponse(`Internal server error: ${error}`));
   }
 }

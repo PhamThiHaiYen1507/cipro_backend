@@ -49,31 +49,31 @@ async function getPullRequestsGithub(
 ) {
   try {
     const prData = [];
-    // for await (const response of octokit.paginate.iterator(
-    //   octokit.rest.pulls.list,
-    //   {
-    //     owner,
-    //     repo,
-    //     per_page: 100,
-    //     state: "all",
-    //   }
-    // )) {
-    //   prData.push(response.data);
-    // }
-    // const processedPrData = prData
-    //   .flat()
-    //   .map(({ id, title: content, created_at: createdAt, user }) => {
-    //     const createdBy = user?.login;
-    //     return {
-    //       id,
-    //       action: "pr",
-    //       content,
-    //       createdAt,
-    //       createdBy,
-    //       projectId,
-    //     };
-    //   });
-    //return processedPrData;
+    for await (const response of octokit.paginate.iterator(
+      octokit.rest.pulls.list,
+      {
+        owner,
+        repo,
+        per_page: 100,
+        state: "all",
+      }
+    )) {
+      prData.push(response.data);
+    }
+    const processedPrData = prData
+      .flat()
+      .map(({ id, title: content, created_at: createdAt, user }) => {
+        const createdBy = user?.login;
+        return {
+          id,
+          action: "pr",
+          content,
+          createdAt,
+          createdBy,
+          projectId,
+        };
+      });
+    return processedPrData;
   } catch (error) {
     console.log(error);
     return [];
@@ -86,31 +86,31 @@ async function getCommitsGithub(
   projectId: Ref<Project>
 ) {
   try {
-    // const commits = [];
-    // for await (const response of octokit.paginate.iterator(
-    //   octokit.rest.repos.listCommits,
-    //   {
-    //     owner,
-    //     repo,
-    //     per_page: 100,
-    //   }
-    // )) {
-    //   commits.push(response.data);
-    // }
-    // const processedCommitData = commits.flat().map(({ sha: id, commit }) => {
-    //   const content = commit.message;
-    //   const createdBy = commit.author?.name;
-    //   const createdAt = commit.author?.date;
-    //   return {
-    //     id,
-    //     action: "commit",
-    //     content,
-    //     createdAt,
-    //     createdBy,
-    //     projectId,
-    //   };
-    // });
-    // return processedCommitData;
+    const commits = [];
+    for await (const response of octokit.paginate.iterator(
+      octokit.rest.repos.listCommits,
+      {
+        owner,
+        repo,
+        per_page: 100,
+      }
+    )) {
+      commits.push(response.data);
+    }
+    const processedCommitData = commits.flat().map(({ sha: id, commit }) => {
+      const content = commit.message;
+      const createdBy = commit.author?.name;
+      const createdAt = commit.author?.date;
+      return {
+        id,
+        action: "commit",
+        content,
+        createdAt,
+        createdBy,
+        projectId,
+      };
+    });
+    return processedCommitData;
   } catch (error) {
     console.log(error);
     return [];
