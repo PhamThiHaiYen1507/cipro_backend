@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Account } from "../models/account";
 import { ChangeHistoryModel, TicketModel, UserModel } from "../models/models";
 import { errorResponse, successResponse } from "../utils/responseFormat";
 
@@ -27,6 +28,9 @@ export async function get(req: Request, res: Response) {
   try {
     const ticket = await TicketModel.findById(id).populate({
       path: "assignee assigner targetedVulnerability",
+      populate: {
+        path: "account",
+      }
     });
     if (ticket) {
       return res.json(successResponse(ticket, "Ticket fetched successfully"));
@@ -69,20 +73,37 @@ export async function create(req: Request, res: Response) {
 
 export async function update(req: Request, res: Response) {
   const { id } = req.params;
-  const { data } = req.body;
+  const { data, assigneeId } = req.body;
+  const { status } = data;
   try {
-    const ticket = await TicketModel.findByIdAndUpdate(id, data, { new: true });
+    const ticket = await TicketModel.findById(id);
+
     if (ticket) {
+      if (status) ticket.status = data.status;
+
+      if (assigneeId) ticket.assignee = assigneeId;
+
+      if (req.user?._id && !ticket.assigner) {
+        const user = await UserModel.findOne({ account: req.user?._id });
+        ticket.assigner = user?._id;
+      }
+
+      await ticket.save();
+
+      const assignee = await UserModel.findById(assigneeId).populate({
+        path: "account",
+      }) as unknown as { account: Account };
+
       // Temporarily, this function is only used for ticket status update
       await ChangeHistoryModel.create({
         objectId: ticket._id,
         action: "update",
         timestamp: ticket.updatedAt,
         account: req.user?._id,
-        description:
-          data.status === "closed"
+        description: assigneeId ? `${req.user?.username} assigned this ticket to ${assignee?.account.username}` :
+          status === "closed"
             ? `${req.user?.username} closed this ticket`
-            : `${req.user?.username} reopened this ticket`,
+            : status === "open" ? `${req.user?.username} reopened this ticket` : ``,
       });
       return res.json(successResponse(null, "Ticket updated successfully"));
     }
