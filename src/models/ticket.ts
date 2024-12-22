@@ -52,4 +52,7 @@ export class Ticket extends TimeStamps {
 
   @prop({ type: String })
   public sonarIssueKey?: string;
+
+  @prop({ type: String, default: 'system' })
+  public createBy!: string
 }

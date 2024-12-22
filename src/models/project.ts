@@ -37,4 +37,7 @@ export class Project extends TimeStamps {
 
   @prop({ type: String })
   public sonarProjectKey?: string;
+
+  @prop({ type: String })
+  public synkOrgId?: string;
 }

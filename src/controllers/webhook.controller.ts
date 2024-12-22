@@ -2,7 +2,7 @@ import axios from "axios";
 import { Request, Response } from "express";
 import { Account } from "../models/account";
 import { GitHubWorkflowAction } from "../models/githubWorkflowAction";
-import { ArtifactModel, ProjectModel, TicketModel, UserModel } from "../models/models";
+import { ArtifactModel, NotificationModel, ProjectModel, TicketModel, UserModel } from "../models/models";
 import { SonarIssue } from "../models/sonarIssue";
 import { SonarProject } from "../models/sonarProject";
 import { errorResponse, successResponse } from "../utils/responseFormat";
@@ -94,9 +94,29 @@ export async function webhookNotification(req: Request, res: Response) {
 
       const accounts = users.map(user => user.account).filter(account => (account as Account).fcmToken);
 
-      accounts.forEach(data => {
+      accounts.forEach(async data => {
         const account = data as Account;
-        sendNotification("Workflow notice", payload.workflow_job.workflow_name + " " + payload.workflow_job.name + " " + payload.action, account!.fcmToken!);
+
+        const title = 'Workflow notice';
+
+        const content = payload.workflow_job.workflow_name + " " + payload.workflow_job.name + " " + payload.action;
+
+        const notificationData = {
+          title: title,
+          content: content,
+          createBy: payload.workflow_job.workflow_name,
+          type: 'workflow',
+          receiver: account,
+        }
+
+        await NotificationModel.create(notificationData);
+
+        sendNotification(title, content, account!.fcmToken!, {
+          title: title,
+          content: content,
+          createBy: payload.workflow_job.workflow_name,
+          type: 'workflow',
+        });
       })
     }
 
@@ -121,8 +141,6 @@ async function getSonarProjectKey(projectName: string) {
     })
 
     response.data.components.forEach((pj: SonarProject) => {
-      console.log(pj.name === projectName);
-
       if (pj.name === projectName) {
         project.sonarProjectKey = pj.key;
         project.save();
@@ -168,8 +186,6 @@ export async function getSonarIssues(projectName: string) {
   })
 
   response.data.issues.forEach(async (issue: SonarIssue) => {
-    console.log(issue);
-
     const issueData = await TicketModel.findOne({ sonarIssueKey: issue.key });
 
     if (!issueData) {
@@ -179,7 +195,16 @@ export async function getSonarIssues(projectName: string) {
         // priority: issue.severity,
         sonarIssueKey: issue.key,
         status: issue.status.toLowerCase(),
+        type: 'sonar',
       })
     }
   });
+}
+
+export async function getSynkIssues(projectName: string) {
+
+}
+
+async function getSynkProjectKey(projectName: string) {
+
 }

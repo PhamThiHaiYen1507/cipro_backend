@@ -1,7 +1,7 @@
 
 import { Request, Response } from "express";
 import admin from "firebase-admin";
-import { AccountModel } from "../models/models";
+import { AccountModel, NotificationModel } from "../models/models";
 import { errorResponse, successResponse } from "../utils/responseFormat";
 
 export async function setNotificationToken(req: Request, res: Response) {
@@ -14,13 +14,14 @@ export async function setNotificationToken(req: Request, res: Response) {
     }
 }
 
-export async function sendNotification(title: string, body: string, token: string) {
+export async function sendNotification(title: string, body: string, token: string, data: any) {
     const message = {
         notification: {
             title,
             body,
         },
         token,
+        data
     };
 
     admin
@@ -32,4 +33,16 @@ export async function sendNotification(title: string, body: string, token: strin
         .catch((error) => {
             console.error("Error sending message:", error);
         });
+}
+
+export async function getNotification(req: Request, res: Response) {
+    try {
+        const notifications = await NotificationModel.find({
+            receiver: req.user?._id
+        });
+
+        return res.json(successResponse(notifications, "Success"));
+    } catch (error) {
+        return res.json(errorResponse(`Internal server error: ${error}`));
+    }
 }
