@@ -2,19 +2,20 @@ import { getModelForClass } from "@typegoose/typegoose";
 import { Account } from "./account";
 import { ActivityHistory } from "./activityHistory";
 import { Artifact } from "./artifact";
+import { ChangeHistory } from "./changeHistory";
 import { CWE } from "./cwe";
+import { Notification } from "./notification";
 import { Phase } from "./phase";
+import { PhaseTemplate } from "./phaseTemplate";
 import { Project } from "./project";
+import { ResolutionHistory } from "./resolutionHistory";
+import { Scanner } from "./scanner";
 import { Task } from "./task";
 import { ThirdParty } from "./thirdParty";
 import { Threat } from "./threat";
 import { Ticket } from "./ticket";
 import { User } from "./user";
 import { Vulnerability } from "./vulnerability";
-import { PhaseTemplate } from "./phaseTemplate";
-import { Scanner } from "./scanner";
-import { ResolutionHistory } from "./resolutionHistory";
-import { ChangeHistory } from "./changeHistory";
 
 const AccountModel = getModelForClass(Account);
 const ActivityHistoryModel = getModelForClass(ActivityHistory);
@@ -32,21 +33,17 @@ const VulnerabilityModel = getModelForClass(Vulnerability);
 const ScannerModel = getModelForClass(Scanner);
 const ResolutionHistoryModel = getModelForClass(ResolutionHistory);
 const ChangeHistoryModel = getModelForClass(ChangeHistory);
+const NotificationModel = getModelForClass(Notification);
 export {
   AccountModel,
   ActivityHistoryModel,
-  ArtifactModel,
-  CWEModel,
-  PhaseModel,
+  ArtifactModel, ChangeHistoryModel, CWEModel, NotificationModel, PhaseModel,
   PhaseTemplateModel,
-  ProjectModel,
-  TaskModel,
+  ProjectModel, ResolutionHistoryModel, ScannerModel, TaskModel,
   ThirdPartyModel,
   ThreatModel,
   TicketModel,
   UserModel,
-  VulnerabilityModel,
-  ScannerModel,
-  ResolutionHistoryModel,
-  ChangeHistoryModel,
+  VulnerabilityModel
 };
+

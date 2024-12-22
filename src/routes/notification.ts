@@ -1,8 +1,9 @@
 import express from "express";
-import { setNotificationToken } from "../controllers/notification.controller";
+import { getNotification, setNotificationToken } from "../controllers/notification.controller";
 
 const notificationRoute = express.Router();
 
 notificationRoute.post("/token", setNotificationToken);
+notificationRoute.get("/", getNotification);
 
 export default notificationRoute;
