@@ -73,7 +73,8 @@ export async function importVulnToImage(req: Request, res: Response) {
 
 export async function webhookNotification(req: Request, res: Response) {
   try {
-    const payload = JSON.parse(req.body.payload) as GitHubWorkflowAction;
+
+    const payload = req.body as GitHubWorkflowAction;
 
     const { full_name: projectName } = payload.repository;
 
