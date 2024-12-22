@@ -6,6 +6,7 @@ import express from "express";
 import { mkdir, readFile, unlink } from "fs/promises";
 const app = express();
 const port = 3000;
+console.log(process.env.API_URL);
 app.get("/image", async (req, res) => {
   const { name } = req.query; // Example: name=alpine:3.12
   if (!name) {

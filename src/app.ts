@@ -5,7 +5,7 @@ import rateLimit from "express-rate-limit";
 import session from "express-session";
 import morgan from "morgan";
 import passport from "passport";
-import "./notification.ts";
+import "./notification";
 
 import { envVariables } from "./env";
 import initialize from "./passport.config";
@@ -32,7 +32,7 @@ import workflowRoute from "./routes/workflow";
 envVariables.parse(process.env);
 const app = express();
 app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(
   cors({
     origin: [

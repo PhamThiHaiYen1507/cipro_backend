@@ -15,10 +15,11 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "moduleResolution": "Node",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "incremental":true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "src/seed"],
+  "include": ["src/**/*.ts", "src/firebase/firebase-service.json"],
+  "exclude": ["node_modules", "src/seed", "dist"],
   "ts-node": {
     "swc": true
   }
