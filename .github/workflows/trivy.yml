@@ -38,8 +38,7 @@ jobs:
         with:
           image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
           format: 'json'
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-results.json'
+          output: 'trivy-report.json'
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Vulnerability Scan Results
