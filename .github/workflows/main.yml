@@ -23,8 +23,8 @@ jobs:
           format: 'JSON'
           out: './dependency-check-report.json'
 
-      - name: Upload Dependency-Check Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: dependency-check-report
-          path: dependency-check-report.json
+      - name: Send JSON Report to Backend via GitHub API
+        run: |
+          curl -X POST https://ae7a-118-70-183-57.ngrok-free.app/reports/owasp \
+           -H "Content-Type: application/json" \
+           --data-binary @dependency-check-report.json
