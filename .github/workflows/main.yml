@@ -1,0 +1,30 @@
+name: OWASP Dependency-Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  dependency-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: "cipro_backend"
+          path: './package-lock.json'
+          format: 'JSON'
+          out: './dependency-check-report.json'
+
+      - name: Upload Dependency-Check Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-check-report
+          path: dependency-check-report.json
