@@ -23,8 +23,8 @@ jobs:
       - name: set variable
         run: echo "SONAR_PROJECT_KEY=${{ steps.read_property.outputs.sonar.projectKey }}" >> $GITHUB_ENV
 
-      - name: check env
-        run: echo $SONAR_PROJECT_KEY
+      - name: Print project key
+        run: echo "Sonar Project Key:${{ steps.read_property.outputs.sonar.projectKey }}"
         
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
