@@ -36,8 +36,5 @@ export class Project extends TimeStamps {
   public phaseList!: Ref<Phase>[];
 
   @prop({ type: String })
-  public sonarProjectKey?: string;
-
-  @prop({ type: String })
   public synkOrgId?: string;
 }

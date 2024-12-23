@@ -90,4 +90,7 @@ export class Account {
 
   @prop({ type: String })
   public fcmToken?: string;
+
+  @prop({ required: true, type: () => [String], default: ['ticket', 'task', 'workflow', 'vulnerability'] })
+  public notifications!: string[];
 }
