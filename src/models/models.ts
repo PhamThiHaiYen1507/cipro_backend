@@ -9,6 +9,7 @@ import { Phase } from "./phase";
 import { PhaseTemplate } from "./phaseTemplate";
 import { Project } from "./project";
 import { ResolutionHistory } from "./resolutionHistory";
+import { ScanHistory } from "./scanHistory";
 import { Scanner } from "./scanner";
 import { Task } from "./task";
 import { ThirdParty } from "./thirdParty";
@@ -34,12 +35,13 @@ const ScannerModel = getModelForClass(Scanner);
 const ResolutionHistoryModel = getModelForClass(ResolutionHistory);
 const ChangeHistoryModel = getModelForClass(ChangeHistory);
 const NotificationModel = getModelForClass(Notification);
+const ScanHistoryModel = getModelForClass(ScanHistory);
 export {
   AccountModel,
   ActivityHistoryModel,
   ArtifactModel, ChangeHistoryModel, CWEModel, NotificationModel, PhaseModel,
   PhaseTemplateModel,
-  ProjectModel, ResolutionHistoryModel, ScannerModel, TaskModel,
+  ProjectModel, ResolutionHistoryModel, ScanHistoryModel, ScannerModel, TaskModel,
   ThirdPartyModel,
   ThreatModel,
   TicketModel,
