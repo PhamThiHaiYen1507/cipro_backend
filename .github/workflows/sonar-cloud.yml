@@ -25,11 +25,13 @@ jobs:
         with:
           path: './sonar-project.properties'
           properties: 'sonar.projectKey'
-      - name: Do something with your bumped release version
-        run: echo ${{ steps.read_property.outputs.sonar.projectKey }}
-        # will print "the value of 'the.key.of.a.property'"
-    
+      - name: set variable
+        run: echo "SONAR_PROJECT_KEY=${{ steps.read_property.outputs.sonar.projectKey }}" >> $GITHUB_ENV
+
+      - name: check env
+        run: echo $SONAR_PROJECT_KEY
+  
       - name: Send notification to received vulnerability from Sonar Cloud
         run: |
-          curl -X POST ${{secrets.BACKEND_URL}}/reports/sonar?projectName=$GITHUB_REPOSITORY&sonarProjectKey=${{ steps.read_property.outputs.sonar.projectKey }} \
+          curl -X POST ${{secrets.BACKEND_URL}}/reports/sonar?projectName=$GITHUB_REPOSITORY&sonarProjectKey=$SONAR_PROJECT_KEY \
            -H "Content-Type: application/json" \
