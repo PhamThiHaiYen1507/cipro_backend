@@ -6,6 +6,7 @@ import {
   AccountModel,
   ActivityHistoryModel,
   ProjectModel,
+  ScanHistoryModel,
   UserModel,
 } from "../models/models";
 import { Project } from "../models/project";
@@ -380,4 +381,22 @@ export async function getActivityHistoryByUsername(
   } catch (error) {
     return res.json(errorResponse(`Internal server error: ${error}`));
   }
+}
+
+export async function getScanHistory(req: Request, res: Response) {
+  const { projectName } = req.query;
+
+  try {
+    const scanHist = await ScanHistoryModel.find({ projectName: projectName });
+
+    if (!scanHist) {
+      return res.json(errorResponse("No scan history found"));
+    }
+    return res.json(
+      successResponse(scanHist, "Successfully retrieved scan history")
+    );
+  } catch (error) {
+    return res.json(errorResponse(`Internal server error: ${error}`));
+  }
+
 }

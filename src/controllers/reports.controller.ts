@@ -1,8 +1,8 @@
 import axios from "axios";
 import { Request, Response } from "express";
-import { ProjectModel, TicketModel } from "../models/models";
-import { SonarIssue } from "../models/sonarIssue";
+import { ProjectModel, ScanHistoryModel, TicketModel } from "../models/models";
 import { errorResponse, successResponse } from "../utils/responseFormat";
+
 
 export async function receivedOwaspReports(req: Request, res: Response) {
     try {
@@ -12,7 +12,9 @@ export async function receivedOwaspReports(req: Request, res: Response) {
 
         const { dependencies } = req.body;
 
-        dependencies.forEach(async (element: any) => {
+        let totalTickets = 0;
+
+        for (const element of dependencies) {
             const cveIds = element.vulnerabilities.map((vuln: any) => vuln.name).sort().join('_');
 
             const identifier = `${element.fileName}-${cveIds}`;
@@ -20,7 +22,11 @@ export async function receivedOwaspReports(req: Request, res: Response) {
             try {
                 const existingTicket = await TicketModel.findOne({ uniqueIdentifier: identifier });
 
+
+
                 if (!existingTicket) {
+                    totalTickets += 1;
+
                     TicketModel.create({
                         title: element.fileName,
                         createBy: 'owasp',
@@ -40,9 +46,18 @@ export async function receivedOwaspReports(req: Request, res: Response) {
                         uniqueIdentifier: identifier,
                     });
                 }
+
+
             } catch (error) {
                 console.error(error);
             }
+        };
+
+        ScanHistoryModel.create({
+            projectName: projectName,
+            description: `OWASP Dependency Check workflow run completed with ${totalTickets} new tickets`,
+            createBy: 'owasp',
+            totalTicketAdded: totalTickets,
         });
 
 
@@ -91,7 +106,9 @@ export async function receivedTrivyReports(req: Request, res: Response) {
 
         const { Results: results } = req.body;
 
-        results.forEach(async (element: any) => {
+        let totalTickets = 0;
+
+        for (const element of results) {
             const cveIds = element.Vulnerabilities.map((vuln: any) => vuln.VulnerabilityID).sort().join('_');
 
             const identifier = `${element.Target}-${cveIds}`;
@@ -100,6 +117,8 @@ export async function receivedTrivyReports(req: Request, res: Response) {
                 const existingTicket = await TicketModel.findOne({ uniqueIdentifier: identifier });
 
                 if (!existingTicket) {
+                    totalTickets += 1;
+
                     TicketModel.create({
                         title: element.Target,
                         createBy: 'trivy',
@@ -122,6 +141,13 @@ export async function receivedTrivyReports(req: Request, res: Response) {
             } catch (error) {
                 console.error(error);
             }
+        };
+
+        ScanHistoryModel.create({
+            projectName: projectName,
+            description: `Trivy workflow run completed with ${totalTickets} new tickets`,
+            createBy: 'trivy',
+            totalTicketAdded: totalTickets,
         });
 
         return res.json(successResponse(null, "Success"));
@@ -176,12 +202,16 @@ export async function receivedSonarReports(req: Request, res: Response) {
             headers: headers,
         });
 
-        response.data.issues.forEach(async (issue: SonarIssue) => {
+        let totalTickets = 0;
+
+        for (const issue of response.data.issues) {
             const uniqueId = `${issue.key}_${issue.rule}`;
 
             const issueData = await TicketModel.findOne({ uniqueIdentifier: uniqueId });
 
             if (!issueData) {
+                totalTickets += 1;
+
                 TicketModel.create({
                     projectName: projectName,
                     title: issue.message,
@@ -194,8 +224,14 @@ export async function receivedSonarReports(req: Request, res: Response) {
                     description: issue.flows.map((flow: any) => flow.locations.map((location: any) => `Component: ${location.component}\nLine: ${location.textRange.startLine}\nMessage: ${location.msg || ''}`).join('\n\n')).join('\n\n'),
                 })
             }
-        });
+        };
 
+        ScanHistoryModel.create({
+            projectName: projectName,
+            description: `Trivy workflow run completed with ${totalTickets} new tickets`,
+            createBy: 'trivy',
+            totalTicketAdded: totalTickets,
+        });
 
         return res.json(successResponse(null, "Success"));
     } catch (error) {
