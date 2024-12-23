@@ -34,7 +34,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   
-      - name: Send notification to received vulnerability from Sonar Cloud
+      - name: Send notification to receive vulnerabilities
         run: |
-          curl -X POST ${{secrets.BACKEND_URL}}/reports/sonar?projectName=$GITHUB_REPOSITORY&sonarProjectKey=$SONAR_PROJECT_KEY \
-           -H "Content-Type: application/json" \
+          curl -X POST "${{ secrets.BACKEND_URL }}/reports/sonar?projectName=$GITHUB_REPOSITORY&sonarProjectKey=$SONAR_PROJECT_KEY" \
+           -H "Content-Type: application/json"
