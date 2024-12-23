@@ -13,11 +13,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           
       - name: Read value from Properties-file
         id: read_property
@@ -26,10 +21,16 @@ jobs:
           path: './sonar-project.properties'
           properties: 'sonar.projectKey'
       - name: set variable
-        run: echo "SONAR_PROJECT_KEY=${{ steps.read_property.outputs.sonar.projectKey }}" >> $GITHUB_ENV
+        run: echo "SONAR_PROJECT_KEY=${{ read_property.sonar.projectKey }}" >> $GITHUB_ENV
 
       - name: check env
         run: echo $SONAR_PROJECT_KEY
+        
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   
       - name: Send notification to received vulnerability from Sonar Cloud
         run: |
