@@ -67,7 +67,7 @@ export async function receivedOwaspReports(req: Request, res: Response) {
             projectName: project?.name,
             description: description,
             createBy: 'owasp',
-            totalTicketAdded: totalTickets,
+            totalTicketAdded: totalTickets.length,
         });
 
         sendNotificationToUser(project?.name ?? '', description);
@@ -164,7 +164,7 @@ export async function receivedTrivyReports(req: Request, res: Response) {
             projectName: projectName,
             description: description,
             createBy: 'trivy',
-            totalTicketAdded: totalTickets,
+            totalTicketAdded: totalTickets.length,
         });
 
         sendNotificationToUser(projectName as string, description);
@@ -254,7 +254,7 @@ export async function receivedSonarReports(req: Request, res: Response) {
             projectName: projectName,
             description: description,
             createBy: 'sonar',
-            totalTicketAdded: totalTickets,
+            totalTicketAdded: totalTickets.length,
         });
 
         sendNotificationToUser(projectName as string, description);
