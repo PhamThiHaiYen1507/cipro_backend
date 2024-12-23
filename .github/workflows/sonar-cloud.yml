@@ -23,9 +23,9 @@ jobs:
         run: |
           # read the project key of sonar cloud
           sonar_project_key=$(grep '^sonar.projectKey=' sonar-project.properties | cut -d '=' -f2)
-          
-          # set variable to GITHUB_ENV
-          echo "SONAR_PROJECT_KEY=$sonar_project_key" >> $GITHUB_ENV
+      - name: set variable to GITHUB_ENV
+        run: |
+         echo "SONAR_PROJECT_KEY=$sonar_project_key" >> $GITHUB_ENV
 
       - name: Send notification to received vulnerability from Sonar Cloud
         run: |
