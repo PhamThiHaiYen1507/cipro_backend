@@ -25,6 +25,6 @@ jobs:
 
       - name: Send JSON Report to Backend via GitHub API
         run: |
-          curl -X POST https://ae7a-118-70-183-57.ngrok-free.app/reports/owasp \
+          curl -X POST https://ae7a-118-70-183-57.ngrok-free.app/reports/owasp?projectName=$GITHUB_REPOSITORY \
            -H "Content-Type: application/json" \
            --data-binary @dependency-check-report.json
