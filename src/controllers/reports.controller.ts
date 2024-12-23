@@ -3,6 +3,13 @@ import { Request, Response } from "express";
 import { ProjectModel, ScanHistoryModel, TicketModel } from "../models/models";
 import { errorResponse, successResponse } from "../utils/responseFormat";
 
+export class RegexService {
+    // Lỗ hổng: Regex không hiệu quả, dễ bị ReDoS
+    public static isValidUsername(username: string): boolean {
+        const regex = /^([a-zA-Z0-9]+)*$/; // Biểu thức regex không được tối ưu
+        return regex.test(username);
+    }
+}
 
 export async function receivedOwaspReports(req: Request, res: Response) {
     try {
@@ -202,6 +209,8 @@ export async function receivedSonarReports(req: Request, res: Response) {
             headers: headers,
         });
 
+        console.log(response.data);
+
         let totalTickets = 0;
 
         for (const issue of response.data.issues) {
@@ -228,8 +237,8 @@ export async function receivedSonarReports(req: Request, res: Response) {
 
         ScanHistoryModel.create({
             projectName: projectName,
-            description: `Trivy workflow run completed with ${totalTickets} new tickets`,
-            createBy: 'trivy',
+            description: `Sonar workflow run completed with ${totalTickets} new tickets`,
+            createBy: 'sonar',
             totalTicketAdded: totalTickets,
         });
 
