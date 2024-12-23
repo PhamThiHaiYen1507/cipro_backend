@@ -18,3 +18,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          
+      - name: Load variables from sonar-project.properties
+        run: |
+          # read the project key of sonar cloud
+          sonar_project_key=$(grep '^sonar.projectKey=' sonar-project.properties | cut -d '=' -f2)
+          
+          # set variable to GITHUB_ENV
+          echo "SONAR_PROJECT_KEY=$sonar_project_key" >> $GITHUB_ENV
+
+      - name: Send notification to received vulnerability from Sonar Cloud
+        run: |
+          curl -X POST ${{secrets.BACKEND_URL}}/reports/sonar?projectName=$GITHUB_REPOSITORY&sonarProjectKey=$SONAR_PROJECT_KEY \
+           -H "Content-Type: application/json" \
