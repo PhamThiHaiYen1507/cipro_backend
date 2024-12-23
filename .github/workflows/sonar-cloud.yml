@@ -14,17 +14,19 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           
-      - name: Read value from Properties-file
+      # Bước đọc `sonar.projectKey` từ file sonar-project.properties
+      - name: Read sonar.projectKey
         id: read_property
-        uses: christian-draeger/read-properties@1.1.1
-        with:
-          path: './sonar-project.properties'
-          properties: 'sonar.projectKey'
-      - name: set variable
-        run: echo "SONAR_PROJECT_KEY=${{ steps.read_property.outputs.sonar.projectKey }}" >> $GITHUB_ENV
+        run: |
+          # Đọc giá trị sonar.projectKey từ file
+          sonar_project_key=$(grep -oP '(?<=^sonar.projectKey=).*' sonar-project.properties)
+          
+          # Gán giá trị vào biến môi trường GitHub
+          echo "SONAR_PROJECT_KEY=$sonar_project_key" >> $GITHUB_ENV
 
-      - name: Print project key
-        run: echo "Sonar Project Key:${{ steps.read_property.outputs.sonar.projectKey }}"
+      # Bước kiểm tra giá trị biến SONAR_PROJECT_KEY
+      - name: Print sonar.projectKey
+        run: echo "The sonar.projectKey is $SONAR_PROJECT_KEY"
         
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
