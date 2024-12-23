@@ -248,7 +248,7 @@ export async function receivedSonarReports(req: Request, res: Response) {
             }
         };
 
-        const description = `Sonar workflow run completed with ${totalTickets} new tickets`;
+        const description = `Sonar workflow run completed with ${totalTickets.length} new tickets`;
 
         ScanHistoryModel.create({
             projectName: projectName,
