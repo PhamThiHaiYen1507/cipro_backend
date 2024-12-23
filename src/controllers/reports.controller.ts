@@ -185,7 +185,7 @@ export async function receivedSonarReports(req: Request, res: Response) {
                 TicketModel.create({
                     projectName: projectName,
                     title: issue.message,
-                    priority: issue.severity.toLowerCase(),
+                    priority: evaluateSonarPriority(issue.severity),
                     sonarIssueKey: issue.key,
                     status: issue.status.toLowerCase(),
                     type: 'sonar',
@@ -201,4 +201,13 @@ export async function receivedSonarReports(req: Request, res: Response) {
     }
 }
 
+function evaluateSonarPriority(severity: string): string {
+    if (['critial', 'high'].includes(severity.toLowerCase())) {
+        return "high";
+    } else if (severity.toLowerCase() === "medium") {
+        return "medium";
+    } else {
+        return "low";
+    }
+}
 

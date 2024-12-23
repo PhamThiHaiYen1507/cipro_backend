@@ -38,7 +38,7 @@ export class Ticket extends TimeStamps {
 
   @prop({
     required: true,
-    enum: ["low", "medium", "high", "critial"],
+    enum: ["low", "medium", "high"],
     default: "low",
     type: String,
   })
