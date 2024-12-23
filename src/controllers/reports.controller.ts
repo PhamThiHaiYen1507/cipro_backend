@@ -3,17 +3,13 @@ import { Request, Response } from "express";
 import { ProjectModel, ScanHistoryModel, TicketModel } from "../models/models";
 import { errorResponse, successResponse } from "../utils/responseFormat";
 
-export class RegexService {
-    // Lỗ hổng: Regex không hiệu quả, dễ bị ReDoS
-    public static isValidUsername(username: string): boolean {
-        const regex = /^([a-zA-Z0-9]+)*$/; // Biểu thức regex không được tối ưu
-        return regex.test(username);
-    }
-}
-
 export async function receivedOwaspReports(req: Request, res: Response) {
     try {
         const { projectName } = req.query;
+
+        const projectTest = await ProjectModel.findOne({ name: { $regex: new RegExp(`/${projectName}$`, "i") } });
+
+        console.log(projectTest);
 
         const project = await ProjectModel.findOne({ name: projectName });
 
