@@ -191,6 +191,7 @@ export async function receivedSonarReports(req: Request, res: Response) {
                     type: 'sonar',
                     createBy: 'sonar',
                     uniqueIdentifier: uniqueId,
+                    description: issue.flows.map((flow: any) => flow.locations.map((location: any) => `Component: ${location.component}\nLine: ${location.textRange.startLine}\nMessage: ${location.msg || ''}`).join('\n\n')).join('\n\n'),
                 })
             }
         });
