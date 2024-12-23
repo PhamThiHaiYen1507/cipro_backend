@@ -27,6 +27,10 @@ jobs:
           file-path: 'sonar-project.properties'
           keys: 'projectKey'
 
+      - name: Get the Read properties
+        run: |
+          echo "key1: ${{ steps.read-properties.outputs.projectKey }}"
+    
       - name: Send notification to received vulnerability from Sonar Cloud
         run: |
           curl -X POST ${{secrets.BACKEND_URL}}/reports/sonar?projectName=$GITHUB_REPOSITORY&sonarProjectKey=${{ steps.read-properties.outputs.projectKey }} \
