@@ -52,6 +52,7 @@ export async function create(req: Request, res: Response) {
       ...data,
       assignee: assignee?._id,
       assigner: assigner?._id,
+      createBy: req.user?.username,
     });
     await UserModel.findByIdAndUpdate(data.assignee, {
       $push: {
