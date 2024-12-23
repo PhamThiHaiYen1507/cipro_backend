@@ -189,6 +189,7 @@ export async function receivedSonarReports(req: Request, res: Response) {
                     sonarIssueKey: issue.key,
                     status: issue.status.toLowerCase(),
                     type: 'sonar',
+                    createBy: 'sonar',
                     uniqueIdentifier: uniqueId,
                 })
             }
