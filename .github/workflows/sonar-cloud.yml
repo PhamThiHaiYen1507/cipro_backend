@@ -21,7 +21,7 @@ jobs:
           path: './sonar-project.properties'
           properties: 'sonar.projectKey'
       - name: set variable
-        run: echo "SONAR_PROJECT_KEY=${{ read_property.sonar.projectKey }}" >> $GITHUB_ENV
+        run: echo "SONAR_PROJECT_KEY=${{ steps.read_property.outputs.sonar.projectKey }}" >> $GITHUB_ENV
 
       - name: check env
         run: echo $SONAR_PROJECT_KEY
