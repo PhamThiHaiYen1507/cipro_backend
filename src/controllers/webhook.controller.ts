@@ -1,18 +1,9 @@
-import axios from "axios";
 import { Request, Response } from "express";
 import { Account } from "../models/account";
 import { GitHubWorkflowAction } from "../models/githubWorkflowAction";
-import { ArtifactModel, NotificationModel, ProjectModel, TicketModel, UserModel } from "../models/models";
-import { SonarIssue } from "../models/sonarIssue";
-import { SonarProject } from "../models/sonarProject";
+import { ArtifactModel, NotificationModel, ProjectModel, UserModel } from "../models/models";
 import { errorResponse, successResponse } from "../utils/responseFormat";
 import { sendNotification } from "./notification.controller";
-
-const baseUrl = process.env.SONAR_CLOUD_URL;
-const organization = "phamthihaiyen1507";
-const headers = {
-  'Authorization': `Bearer ${process.env.SONAR_CLOUD_API_TOKEN}`
-}
 
 interface RequestBody {
   eventCode: string;
@@ -121,91 +112,10 @@ export async function webhookNotification(req: Request, res: Response) {
       })
     }
 
-    if (payload.action == 'completed' && payload.workflow_job.workflow_name == 'SonarCloud') {
-      getSonarIssues(projectName);
-    }
-
     return res.json(successResponse(true, "Event received"));
   } catch (error) {
     console.error(error);
 
     return res.json(errorResponse("Error processing event"));
   }
-}
-
-async function getSonarProjectKey(projectName: string) {
-  const project = await ProjectModel.findOne({ name: { $regex: projectName, $options: 'i' } });
-
-  if (project && !project.sonarProjectKey) {
-    const response = await axios.get(`${baseUrl}/projects/search?q=${projectName}&organization=${organization}`, {
-      headers: headers,
-    })
-
-    response.data.components.forEach((pj: SonarProject) => {
-      if (pj.name === projectName) {
-        project.sonarProjectKey = pj.key;
-        project.save();
-      }
-    })
-  }
-
-  return project;
-}
-
-async function getSonarPullRequestId(projectName: string) {
-  const project = await getSonarProjectKey(projectName);
-
-  if (!project?.sonarProjectKey) {
-    return null;
-  }
-
-  const response = await axios.get(
-
-    `${baseUrl}/project_pull_requests/list?project=${project.sonarProjectKey}`, {
-    headers: headers,
-  });
-
-  if (response.data.pullRequests.length > 0) {
-    return response.data.pullRequests[0].key;
-  }
-
-  return null;
-}
-
-export async function getSonarIssues(projectName: string) {
-
-  const project = await getSonarProjectKey(projectName);
-
-  const pullId = await getSonarPullRequestId(projectName);
-
-  if (!project?.sonarProjectKey) {
-    return;
-  }
-
-  const response = await axios.get(`${baseUrl}/issues/search?componentKeys=${project.sonarProjectKey}&pullRequest=${pullId}&statuses=OPEN`, {
-    headers: headers,
-  })
-
-  response.data.issues.forEach(async (issue: SonarIssue) => {
-    const issueData = await TicketModel.findOne({ sonarIssueKey: issue.key });
-
-    if (!issueData) {
-      TicketModel.create({
-        projectName: project.name,
-        title: issue.message,
-        // priority: issue.severity,
-        sonarIssueKey: issue.key,
-        status: issue.status.toLowerCase(),
-        type: 'sonar',
-      })
-    }
-  });
-}
-
-export async function getSynkIssues(projectName: string) {
-
-}
-
-async function getSynkProjectKey(projectName: string) {
-
 }
