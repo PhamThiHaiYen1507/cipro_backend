@@ -387,7 +387,7 @@ export async function getScanHistory(req: Request, res: Response) {
   const { projectName } = req.query;
 
   try {
-    const scanHist = await ScanHistoryModel.find({ projectName: projectName });
+    const scanHist = await ScanHistoryModel.find({ projectName: projectName }, { sort: { createdAt: -1 }, limit: 5 });
 
     if (!scanHist) {
       return res.json(errorResponse("No scan history found"));

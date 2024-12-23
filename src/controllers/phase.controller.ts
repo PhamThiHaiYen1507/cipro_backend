@@ -41,6 +41,8 @@ export async function createFromTemplate(req: Request, res: Response) {
   try {
     // Template check: To determine whether is a new template or an existing one
     if (!data._id) {
+      console.log('create new');
+
       const newTemplate = await PhaseTemplateModel.create({
         ...data,
         createdBy: username,

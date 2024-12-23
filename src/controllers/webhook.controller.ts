@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { Account } from "../models/account";
 import { GitHubWorkflowAction } from "../models/githubWorkflowAction";
-import { ArtifactModel, NotificationModel, ProjectModel, UserModel } from "../models/models";
+import { ArtifactModel, ProjectModel, UserModel } from "../models/models";
+import { Notification } from "../models/notification";
 import { errorResponse, successResponse } from "../utils/responseFormat";
 import { sendNotification } from "./notification.controller";
 
@@ -93,22 +94,20 @@ export async function webhookNotification(req: Request, res: Response) {
 
         const content = payload.workflow_job.workflow_name + " " + payload.workflow_job.name + " " + payload.action;
 
-        const notificationData = {
+        const notificationData: Notification = {
           title: title,
           content: content,
           createBy: payload.workflow_job.workflow_name,
           type: 'workflow',
-          receiver: account,
+          receiver: account._id,
         }
 
-        await NotificationModel.create(notificationData);
-
-        sendNotification(title, content, account!.fcmToken!, {
+        sendNotification(notificationData, account!.fcmToken!, {
           title: title,
           content: content,
           createBy: payload.workflow_job.workflow_name,
           type: 'workflow',
-        });
+        },);
       })
     }
 

@@ -1,7 +1,9 @@
 import { isDocumentArray } from "@typegoose/typegoose";
 import { Request, Response } from "express";
-import { ProjectModel, TaskModel } from "../models/models";
+import { Account } from "../models/account";
+import { PhaseModel, ProjectModel, TaskModel, UserModel } from "../models/models";
 import { errorResponse, successResponse } from "../utils/responseFormat";
+import { sendNotification } from "./notification.controller";
 export async function getAll(req: Request, res: Response) {
   const { projectName, filter } = req.query;
   const decodedProjectName = decodeURIComponent(projectName as string);
@@ -58,9 +60,34 @@ export async function get(req: Request, res: Response) {
 }
 
 export async function create(req: Request, res: Response) {
-  const { data } = req.body;
+  const { data, phaseId, assigneeId } = req.body;
   try {
     const newTask = await TaskModel.create(data);
+
+    await PhaseModel.findByIdAndUpdate(phaseId, { $addToSet: { tasks: newTask._id } })
+
+    const user = await UserModel.findByIdAndUpdate(
+      assigneeId,
+      { $addToSet: { taskAssigned: newTask._id } },
+      { new: true }
+    ).populate({
+      path: "account"
+    });
+
+    const account = user?.account as Account;
+
+    if (account && account.fcmToken) {
+      sendNotification({
+        title: 'New task',
+        content: `You have been assigned to task "${newTask.name}"`,
+        createBy: 'system',
+        receiver: account._id,
+        type: 'task',
+      },
+        account.fcmToken,
+      )
+    }
+
     return res.json(successResponse(null, "Task created"));
   } catch (error) {
     return res.json(errorResponse(`Internal server error: ${error}`));

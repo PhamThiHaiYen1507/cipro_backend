@@ -1,7 +1,9 @@
 
 import { Request, Response } from "express";
 import admin from "firebase-admin";
+import { Account } from "../models/account";
 import { AccountModel, NotificationModel } from "../models/models";
+import { Notification } from "../models/notification";
 import { errorResponse, successResponse } from "../utils/responseFormat";
 
 export async function setNotificationToken(req: Request, res: Response) {
@@ -14,32 +16,41 @@ export async function setNotificationToken(req: Request, res: Response) {
     }
 }
 
-export async function sendNotification(title: string, body: string, token: string, data: any) {
-    const message = {
-        notification: {
-            title,
-            body,
-        },
-        token,
-        data
-    };
+export async function sendNotification(info: Notification, token: string, data?: any, user?: Account) {
+    const account = await AccountModel.findById(info.receiver._id);
 
-    admin
-        .messaging()
-        .send(message)
-        .then((response) => {
-            console.log("Successfully sent message:", response);
-        })
-        .catch((error) => {
-            console.error("Error sending message:", error);
-        });
+    if (account && account.notifications.includes(info.type)) {
+        const message = {
+            notification: {
+                title: info.title,
+                body: info.content,
+            },
+            token,
+            data
+        };
+
+        admin
+            .messaging()
+            .send(message)
+            .then((response) => {
+                console.log("Successfully sent message:", response);
+            })
+            .catch((error) => {
+                console.error("Error sending message:", error);
+            });
+    }
+
+    if (info) {
+        NotificationModel.create(info);
+    }
 }
 
 export async function getNotification(req: Request, res: Response) {
     try {
         const notifications = await NotificationModel.find({
             receiver: req.user?._id
-        });
+        }, null,
+            { sort: { createdAt: -1 }, limit: 50 });
 
         return res.json(successResponse(notifications, "Success"));
     } catch (error) {
