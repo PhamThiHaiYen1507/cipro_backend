@@ -5,15 +5,15 @@ import { errorResponse, successResponse } from "../utils/responseFormat";
 
 export async function receivedOwaspReports(req: Request, res: Response) {
     try {
-        const { projectName } = req.query;
+        const { dependencies, projectInfo } = req.body;
 
-        const projectTest = await ProjectModel.findOne({ name: { $regex: new RegExp(`/${projectName}$`, "i") } });
+        const project = await ProjectModel.findOne({ name: { $regex: new RegExp(`/${projectInfo.name}$`, "i") } });
 
-        console.log(projectTest);
+        // const { projectName } = req.query;
 
-        const project = await ProjectModel.findOne({ name: projectName });
+        // const project = await ProjectModel.findOne({ name: projectName });
 
-        const { dependencies } = req.body;
+        // const { dependencies } = req.body;
 
         let totalTickets = 0;
 
@@ -57,7 +57,7 @@ export async function receivedOwaspReports(req: Request, res: Response) {
         };
 
         ScanHistoryModel.create({
-            projectName: projectName,
+            projectName: project?.name,
             description: `OWASP Dependency Check workflow run completed with ${totalTickets} new tickets`,
             createBy: 'owasp',
             totalTicketAdded: totalTickets,
