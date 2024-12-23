@@ -19,15 +19,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           
-      - name: Load variables from sonar-project.properties
-        run: |
-          # read the project key of sonar cloud
-          sonar_project_key=$(grep '^sonar.projectKey=' sonar-project.properties | cut -d '=' -f2)
-      - name: set variable to GITHUB_ENV
-        run: |
-         echo "SONAR_PROJECT_KEY=$sonar_project_key" >> $GITHUB_ENV
+      - name: Read Properties File
+        uses: kurt-code/gha-properties@v0.0.1
+        id: read-properties
+        with:
+          operation: 'read'
+          file-path: 'sonar-project.properties'
+          keys: 'projectKey'
 
       - name: Send notification to received vulnerability from Sonar Cloud
         run: |
-          curl -X POST ${{secrets.BACKEND_URL}}/reports/sonar?projectName=$GITHUB_REPOSITORY&sonarProjectKey=$SONAR_PROJECT_KEY \
+          curl -X POST ${{secrets.BACKEND_URL}}/reports/sonar?projectName=$GITHUB_REPOSITORY&sonarProjectKey=${{ steps.read-properties.outputs.projectKey }} \
            -H "Content-Type: application/json" \
