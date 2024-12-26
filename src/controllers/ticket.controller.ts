@@ -14,7 +14,7 @@ export async function getAll(req: Request, res: Response) {
     }).populate({
       path: "assignee assigner",
       populate: {
-        path: "account",
+        path: "account taskAssigned ticketAssigned",
       }
     });
     return res.json(successResponse(tickets, "Tickets fetched successfully"));
@@ -29,9 +29,10 @@ export async function get(req: Request, res: Response) {
     const ticket = await TicketModel.findById(id).populate({
       path: "assignee assigner targetedVulnerability",
       populate: {
-        path: "account",
+        path: "ticketAssigned taskAssigned account",
       }
     });
+
     if (ticket) {
       return res.json(successResponse(ticket, "Ticket fetched successfully"));
     } else {

@@ -1,21 +1,26 @@
 import axios from "axios";
 import { Request, Response } from "express";
-import { ProjectModel, ScanHistoryModel, TicketModel } from "../models/models";
+import { Account } from "../models/account";
+import { ProjectModel, ScanHistoryModel, TicketModel, UserModel } from "../models/models";
+import { Ticket } from "../models/ticket";
 import { errorResponse, successResponse } from "../utils/responseFormat";
+import { sendNotification } from "./notification.controller";
 
 export async function receivedOwaspReports(req: Request, res: Response) {
     try {
         const { dependencies, projectInfo } = req.body;
 
+        /// biểu thức không chính quy dễ bị tấn công
         const project = await ProjectModel.findOne({ name: { $regex: new RegExp(`/${projectInfo.name}$`, "i") } });
 
+        // sửa lại biểu thức tránh tấn công
         // const { projectName } = req.query;
 
         // const project = await ProjectModel.findOne({ name: projectName });
 
         // const { dependencies } = req.body;
 
-        let totalTickets = 0;
+        let totalTickets: Ticket[] = [];
 
         for (const element of dependencies) {
             const cveIds = element.vulnerabilities.map((vuln: any) => vuln.name).sort().join('_');
@@ -25,12 +30,10 @@ export async function receivedOwaspReports(req: Request, res: Response) {
             try {
                 const existingTicket = await TicketModel.findOne({ uniqueIdentifier: identifier });
 
-
-
                 if (!existingTicket) {
-                    totalTickets += 1;
 
-                    TicketModel.create({
+
+                    const newTicket = await TicketModel.create({
                         title: element.fileName,
                         createBy: 'owasp',
                         priority: getHighestOwaspPriority(element.vulnerabilities),
@@ -48,6 +51,8 @@ export async function receivedOwaspReports(req: Request, res: Response) {
                         }),
                         uniqueIdentifier: identifier,
                     });
+
+                    totalTickets.push(newTicket as Ticket);
                 }
 
 
@@ -56,13 +61,18 @@ export async function receivedOwaspReports(req: Request, res: Response) {
             }
         };
 
+        const description = `OWASP Dependency Check workflow run completed with ${totalTickets.length} new tickets`;
+
         ScanHistoryModel.create({
             projectName: project?.name,
-            description: `OWASP Dependency Check workflow run completed with ${totalTickets} new tickets`,
+            description: description,
             createBy: 'owasp',
-            totalTicketAdded: totalTickets,
+            totalTicketAdded: totalTickets.length,
         });
 
+        sendNotificationToUser(project?.name ?? '', description);
+
+        sendTicketNotificationToUser(project?.name ?? '', totalTickets);
 
         return res.json(successResponse(null, "Success"));
     } catch (error) {
@@ -109,7 +119,7 @@ export async function receivedTrivyReports(req: Request, res: Response) {
 
         const { Results: results } = req.body;
 
-        let totalTickets = 0;
+        let totalTickets: Ticket[] = [];
 
         for (const element of results) {
             const cveIds = element.Vulnerabilities.map((vuln: any) => vuln.VulnerabilityID).sort().join('_');
@@ -120,9 +130,9 @@ export async function receivedTrivyReports(req: Request, res: Response) {
                 const existingTicket = await TicketModel.findOne({ uniqueIdentifier: identifier });
 
                 if (!existingTicket) {
-                    totalTickets += 1;
 
-                    TicketModel.create({
+
+                    const newTicket = await TicketModel.create({
                         title: element.Target,
                         createBy: 'trivy',
                         priority: getHighestTrivyPriority(element.vulnerabilities),
@@ -140,18 +150,25 @@ export async function receivedTrivyReports(req: Request, res: Response) {
                         }),
                         uniqueIdentifier: identifier,
                     });
+
+                    totalTickets.push(newTicket as Ticket);
                 }
             } catch (error) {
                 console.error(error);
             }
         };
 
+        const description = `Trivy workflow run completed with ${totalTickets.length} new tickets`;
+
         ScanHistoryModel.create({
             projectName: projectName,
-            description: `Trivy workflow run completed with ${totalTickets} new tickets`,
+            description: description,
             createBy: 'trivy',
-            totalTicketAdded: totalTickets,
+            totalTicketAdded: totalTickets.length,
         });
+
+        sendNotificationToUser(projectName as string, description);
+        sendTicketNotificationToUser(projectName as string, totalTickets);
 
         return res.json(successResponse(null, "Success"));
     } catch (error) {
@@ -205,9 +222,7 @@ export async function receivedSonarReports(req: Request, res: Response) {
             headers: headers,
         });
 
-        console.log(response.data);
-
-        let totalTickets = 0;
+        let totalTickets: Ticket[] = [];
 
         for (const issue of response.data.issues) {
             const uniqueId = `${issue.key}_${issue.rule}`;
@@ -215,9 +230,9 @@ export async function receivedSonarReports(req: Request, res: Response) {
             const issueData = await TicketModel.findOne({ uniqueIdentifier: uniqueId });
 
             if (!issueData) {
-                totalTickets += 1;
 
-                TicketModel.create({
+
+                const newTicket = await TicketModel.create({
                     projectName: projectName,
                     title: issue.message,
                     priority: evaluateSonarPriority(issue.severity),
@@ -227,16 +242,25 @@ export async function receivedSonarReports(req: Request, res: Response) {
                     createBy: 'sonar',
                     uniqueIdentifier: uniqueId,
                     description: issue.flows.map((flow: any) => flow.locations.map((location: any) => `Component: ${location.component}\nLine: ${location.textRange.startLine}\nMessage: ${location.msg || ''}`).join('\n\n')).join('\n\n'),
-                })
+                });
+
+                totalTickets.push(newTicket as Ticket);
             }
         };
 
+        const description = `Sonar workflow run completed with ${totalTickets.length} new tickets`;
+
         ScanHistoryModel.create({
             projectName: projectName,
-            description: `Sonar workflow run completed with ${totalTickets} new tickets`,
+            description: description,
             createBy: 'sonar',
-            totalTicketAdded: totalTickets,
+            totalTicketAdded: totalTickets.length,
         });
+
+        sendNotificationToUser(projectName as string, description);
+        sendTicketNotificationToUser(projectName as string, totalTickets);
+
+
 
         return res.json(successResponse(null, "Success"));
     } catch (error) {
@@ -245,7 +269,7 @@ export async function receivedSonarReports(req: Request, res: Response) {
 }
 
 function evaluateSonarPriority(severity: string): string {
-    if (['critial', 'high'].includes(severity.toLowerCase())) {
+    if (['critical', 'high'].includes(severity.toLowerCase())) {
         return "high";
     } else if (severity.toLowerCase() === "medium") {
         return "medium";
@@ -254,3 +278,55 @@ function evaluateSonarPriority(severity: string): string {
     }
 }
 
+async function sendNotificationToUser(projectName: string, description: string) {
+    const project = await ProjectModel.findOne({ name: projectName });
+
+    if (project) {
+        const users = await UserModel.find({ projectIn: project._id }).populate({
+            path: "account",
+        });
+
+        for (const user of users) {
+            const account = user.account as Account;
+
+            if (account.fcmToken) {
+                sendNotification({
+                    receiver: account._id,
+                    title: 'New report',
+                    createBy: 'system',
+                    content: description,
+                    type: 'vulnerability',
+                }, account.fcmToken!,
+                );
+            }
+
+        }
+    }
+}
+
+async function sendTicketNotificationToUser(projectName: string, tickets: Ticket[]) {
+    const project = await ProjectModel.findOne({ name: projectName });
+
+    if (project) {
+        const users = await UserModel.find({ projectIn: project._id }).populate({
+            path: "account",
+        });
+
+        for (const ticket of tickets) {
+            for (const user of users) {
+                const account = user.account as Account;
+
+                if (account.fcmToken) {
+                    sendNotification({
+                        receiver: account._id,
+                        title: 'New ticket',
+                        createBy: 'system',
+                        content: ticket.title,
+                        type: 'ticket',
+                    }, account.fcmToken!,
+                    );
+                }
+            }
+        }
+    }
+}

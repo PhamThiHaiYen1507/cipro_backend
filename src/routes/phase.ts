@@ -18,7 +18,7 @@ import {
 const phaseRoute = express.Router();
 
 phaseRoute.get("/template", getTemplates);
-phaseRoute.post("/template", createPhaseTemplate);
+phaseRoute.post("/template/create", createPhaseTemplate);
 phaseRoute.get("/template/:id", getOneTemplate);
 phaseRoute.patch("/template/:id", updateTemplate);
 phaseRoute.delete("/template/:id", deleteTemplate);
