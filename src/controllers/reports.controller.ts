@@ -8,17 +8,17 @@ import { sendNotification } from "./notification.controller";
 
 export async function receivedOwaspReports(req: Request, res: Response) {
     try {
-        //const { dependencies, projectInfo } = req.body;
+        const { dependencies, projectInfo } = req.body;
 
-        /// biểu thức không chính quy dễ bị tấn công
-        //const project = await ProjectModel.findOne({ name: { $regex: new RegExp(`/${projectInfo.name}$`, "i") } });
+        // biểu thức không chính quy dễ bị tấn công
+        const project = await ProjectModel.findOne({ name: { $regex: new RegExp(`/${projectInfo.name}$`, "i") } });
 
-        // sửa lại biểu thức tránh tấn công
-         const { projectName } = req.query;
+        //sửa lại biểu thức tránh tấn công
+        //  const { projectName } = req.query;
 
-         const project = await ProjectModel.findOne({ name: projectName });
+        //  const project = await ProjectModel.findOne({ name: projectName });
 
-         const { dependencies } = req.body;
+        //  const { dependencies } = req.body;
 
         let totalTickets: Ticket[] = [];
 
