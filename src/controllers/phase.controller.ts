@@ -181,7 +181,7 @@ export async function addArtifactToPhase(req: Request, res: Response) {
     );
     switch (type) {
       case "image":
-        let url = `${process.env.IMAGE_SCANNING_URL}/image`;
+        let url = `${process.env.SERVER_URL}/image`;
         // Connect to scanner to init image scanning
         const account = req.user;
         if (account) {
