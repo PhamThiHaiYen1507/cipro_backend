@@ -107,7 +107,6 @@ export async function getProjectIn(req: Request, res: Response) {
     if (!user) {
       return res.json(errorResponse("User not found"));
     }
-    console.log(user.projectIn);
 
     const data = user.projectIn;
     return res.json(successResponse(data, "List of projects fetched"));
