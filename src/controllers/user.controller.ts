@@ -119,8 +119,9 @@ export async function getProjectIn(req: Request, res: Response) {
 export async function getAllUsers(req: Request, res: Response) {
   try {
     const users = await UserModel.find().populate({
-      path: "account",
+      path: "account taskAssigned",
     });
+
     return res.json(successResponse(users, "List of users fetched"));
   } catch (error) {
     return res.json(errorResponse(`Internal server error: ${error}`));

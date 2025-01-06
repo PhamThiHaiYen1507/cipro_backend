@@ -147,6 +147,7 @@ export async function addMemberToProject(req: Request, res: Response) {
 export async function removeMemberFromProject(req: Request, res: Response) {
   const { projectName } = req.params;
   const { accountId } = req.body;
+
   try {
     const project = await ProjectModel.findOne({ name: projectName });
     if (!project) {
@@ -162,7 +163,7 @@ export async function removeMemberFromProject(req: Request, res: Response) {
         },
       }
     );
-    return res.json(successResponse(project, "Member added to project"));
+    return res.json(successResponse(project, "Member deleted from project"));
   } catch (error) {
     return res.json(errorResponse(`Internal server error: ${error}`));
   }
