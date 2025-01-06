@@ -1,13 +1,13 @@
 import express from "express";
 import {
-  get,
-  create,
-  update,
-  remove,
-  assignTask,
-  getProjectIn,
   addProjectIn,
+  assignTask,
+  create,
+  get,
   getAllUsers,
+  getProjectIn,
+  remove,
+  update,
 } from "../controllers/user.controller";
 import { checkAuth } from "../middlewares/auth";
 
@@ -20,4 +20,5 @@ userRoute.post("/", create);
 userRoute.patch("/", update);
 userRoute.delete("/:id", remove);
 userRoute.patch("/:id/assign/:taskId", assignTask);
+
 export default userRoute;
