@@ -134,7 +134,7 @@ export async function getGithubWorkflowsInfo(req: Request, res: Response) {
     return res.json(errorResponse("Project name is required"));
   }
 
-  const project = getWorkflowRuns(projectName as string, id!);
+  const project = await getWorkflowRuns(projectName as string, id!);
 
   return res.json(successResponse(project, "Workflows found"));
 
